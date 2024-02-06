@@ -5,6 +5,12 @@ variable "region" {
   default     = "us-east-1"
 }
 
+variable "ami_id" {
+  description = "NGINX instance AMI ID"
+  type        = string
+  default     = "ami-0c7217cdde317cfec"
+}
+
 variable "vpc_cidr_block" {
   description = "CIDR block for the VPC"
   type        = string

@@ -42,7 +42,7 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_instance" "nginx_server" {
-  ami           = data.aws_ami.ubuntu.id
+  ami           = var.ami_id
   instance_type = "t3.micro"
 
   user_data_base64 = base64encode("./userdata.sh")
@@ -51,9 +51,8 @@ resource "aws_instance" "nginx_server" {
   }
 }
 
-
 output "ami_id" {
-  value = data.aws_ami.ubuntu.id
+  value = var.ami_id
 }
 output "vpc_id" {
   value = aws_vpc.main.id
