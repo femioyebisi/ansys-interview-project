@@ -1,16 +1,11 @@
-# Provider Configuration
 provider "aws" {
   region = var.region
 }
 
-
-
-# Create VPC
 resource "aws_vpc" "main" {
   cidr_block = var.vpc_cidr_block
 }
 
-# Create public subnets
 resource "aws_subnet" "public" {
   count             = length(var.public_subnet_cidr_blocks)
   vpc_id            = aws_vpc.main.id
@@ -18,7 +13,6 @@ resource "aws_subnet" "public" {
   availability_zone = element(var.region_availability_zones[var.region], count.index)
 }
 
-# Create private subnets
 resource "aws_subnet" "private" {
   count             = length(var.private_subnet_cidr_blocks)
   vpc_id            = aws_vpc.main.id
@@ -26,12 +20,10 @@ resource "aws_subnet" "private" {
   availability_zone = element(var.region_availability_zones[var.region], count.index)
 }
 
-# Internet Gateway for public subnets
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
 }
 
-# Create Route Table for public subnets
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
@@ -41,14 +33,26 @@ resource "aws_route_table" "public" {
   }
 }
 
-# Associate public subnets with the public route table
 resource "aws_route_table_association" "public" {
   count          = length(var.public_subnet_cidr_blocks)
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
 
-# Output
+resource "aws_instance" "nginx_server" {
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t3.micro"
+
+  user_data_base64 = base64encode("./userdata.sh")
+  tags = {
+    Name = "NGINX Server"
+  }
+}
+
+
+output "ami_id" {
+  value = data.aws_ami.ubuntu.id
+}
 output "vpc_id" {
   value = aws_vpc.main.id
 }
